@@ -1,0 +1,19 @@
+name: Version Check
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  check-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check version bumps
+        run: |
+          chmod +x .github/scripts/check-versions.sh
+          .github/scripts/check-versions.sh
