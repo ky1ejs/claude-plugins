@@ -1,0 +1,17 @@
+{
+  "name": "ky1ejs-plugins",
+  "owner": {
+    "name": "Kyle Satti"
+  },
+  "metadata": {
+    "description": "Personal collection of Claude Code plugins"
+  },
+  "plugins": [
+    {
+      "name": "ios-engineer",
+      "source": "./plugins/ios-engineer",
+      "description": "iOS development tools with visual feedback via iOS Simulator MCP integration",
+      "version": "1.0.0"
+    }
+  ]
+}
