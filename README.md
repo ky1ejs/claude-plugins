@@ -27,6 +27,27 @@ Then install plugins:
 
 ## Available Plugins
 
+### spec-workflow
+
+Spec-driven development workflow: explore ideas, write specs, review with AI personas, and execute implementations.
+
+**Skills:**
+- `/idea-explorer` - Collaborative exploration to refine ideas
+- `/spec-writer` - Transform ideas into detailed specifications
+- `/spec-orchestrator` - Multi-agent review with AI personas
+- `/spec-executor` - Execute specs with batched checkpoints
+- `/create-worktree` - Create isolated git worktrees
+- `/spec-workflow-init` - Scaffold configuration in your project
+
+**Install:**
+```
+/plugin install spec-workflow@ky1ejs-plugins
+```
+
+See [spec-workflow README](./plugins/spec-workflow/README.md) for details.
+
+---
+
 ### ios-engineer
 
 iOS development tools with visual feedback via iOS Simulator MCP integration.
