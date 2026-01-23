@@ -13,7 +13,6 @@ allowed-tools:
   - Bash(./apollo-codegen*)
   - Task
   - mcp__ios-simulator__*
-  - mcp__xcodebuild__*
 ---
 
 # iOS Engineer
@@ -56,7 +55,6 @@ This skill has access to iOS Simulator MCP tools that enable a powerful feedback
 | `mcp__ios-simulator__record_video` | Record screen video |
 | `mcp__ios-simulator__launch_app` | Launch app by bundle ID |
 | `mcp__ios-simulator__install_app` | Install .app bundle |
-| `mcp__xcodebuild__*` | Build, test, and deployment tools |
 
 ### Screenshots Directory
 
@@ -70,28 +68,30 @@ Screenshots and recordings are saved to `ios/.screenshots/` (gitignored). This d
 
 After making UI changes, follow this workflow:
 
+1 **Install Dependencies**
+```
+xcodebuild -resolvePackageDependencies -project $PROJECT_NAME.xcodeproj -scheme $SCHEME
+```
+
 1. **Build the app**
-   ```
-   Use mcp__xcodebuild tools or:
-   xcodebuild -scheme Cut -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build
-   ```
+```
+Use mcp__xcodebuild tools or:
+xcodebuild -scheme $SCHEME -destination 'platform=iOS Simulator,name=$SIMULATOR' build
+```
 
 2. **Launch in simulator**
-   ```
-   mcp__ios-simulator__launch_app with bundle ID: com.watch.cut
-   ```
+```
+mcp__ios-simulator__launch_app with bundle ID: $BUNDLE_ID
+```
 
 3. **Navigate to the changed screen**
-   - Use deep links: `xcrun simctl openurl booted "cut://..."`
-   - Or use `ui_tap` to navigate through the UI
+- Use deep links: `xcrun simctl openurl booted "$DEEP_LINK_SCHEME://..."`
+- Or use `ui_tap` to navigate through the UI
 
 4. **Capture and analyze**
-   - Use `ui_view` to get screenshot for visual analysis
-   - Use `ui_describe_all` to verify accessibility tree
-   - Verify elements exist and are correctly positioned
-
-5. **Iterate if needed**
-   - If something looks wrong, make code changes and repeat
+- Use `ui_view` to get screenshot for visual analysis
+- Use `ui_describe_all` to verify accessibility tree
+- Verify elements exist and are correctly positioned
 
 ### When to Use Visual Feedback
 
@@ -132,7 +132,7 @@ After completing ANY iOS work:
 
 ### Take screenshot after navigation
 ```
-1. mcp__ios-simulator__launch_app(bundleId: "com.watch.cut")
+1. mcp__ios-simulator__launch_app(bundleId: "$BUNDLE_ID")
 2. Wait 3 seconds for app load
 3. mcp__ios-simulator__ui_view() - analyze the home screen
 4. mcp__ios-simulator__ui_tap(x: 200, y: 400) - tap on element

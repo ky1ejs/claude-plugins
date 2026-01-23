@@ -54,7 +54,6 @@ iOS development tools with visual feedback via iOS Simulator MCP integration.
 
 **Features:**
 - iOS Simulator automation (screenshots, UI inspection, tap/swipe/type)
-- Xcode build and test tools
 - iOS Engineer skill with SwiftUI patterns and best practices
 
 **Setup:**

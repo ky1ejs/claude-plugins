@@ -5,7 +5,6 @@ This plugin provides Claude Code with iOS development capabilities including vis
 ## Features
 
 - **iOS Simulator MCP** - Take screenshots, inspect UI hierarchy, tap/swipe/type
-- **Xcode Build MCP** - Build, test, and deploy iOS apps
 - **iOS Engineer Skill** - SwiftUI patterns, Apollo GraphQL, and best practices for Cut
 
 ## Setup
@@ -56,7 +55,6 @@ This plugin bundles two MCP servers:
 | Server | Purpose |
 |--------|---------|
 | `ios-simulator` | UI automation, screenshots, accessibility inspection |
-| `xcodebuild` | Build, test, and deployment workflows |
 
 ## Troubleshooting
 

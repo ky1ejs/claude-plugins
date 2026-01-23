@@ -1,20 +1,17 @@
 {
   "name": "ios-engineer",
-  "version": "1.0.0",
-  "description": "iOS development tools for Cut app with visual feedback via iOS Simulator MCP integration",
+  "version": "1.1.0",
+  "description": "iOS development tools with visual feedback via iOS Simulator MCP integration",
   "mcpServers": {
     "ios-simulator": {
       "type": "stdio",
       "command": "npx",
-      "args": ["ios-simulator-mcp"],
+      "args": [
+        "ios-simulator-mcp"
+      ],
       "env": {
         "IOS_SIMULATOR_MCP_DEFAULT_OUTPUT_DIR": "./ios/.screenshots"
       }
-    },
-    "xcodebuild": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["xcodebuildmcp@latest"]
     }
   }
 }
