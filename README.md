@@ -80,3 +80,20 @@ Rebases the current branch onto the latest default branch (main, master, etc.), 
 ```
 /plugin install rebase-main@ky1ejs-plugins
 ```
+
+---
+
+### pr-review-handler
+
+Processes PR review comments: assesses each piece of feedback, creates an action plan, implements changes, and responds to reviewers.
+
+**Features:**
+- Fetches unresolved review threads via GitHub GraphQL API
+- Parallel assessment of each comment with spec-awareness
+- Conflict detection when reviewers disagree
+- Drafts and posts responses with user approval
+
+**Install:**
+```
+/plugin install pr-review-handler@ky1ejs-plugins
+```

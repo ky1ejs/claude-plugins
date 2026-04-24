@@ -1,0 +1,5 @@
+{
+  "name": "pr-review-handler",
+  "version": "1.0.0",
+  "description": "Processes PR review comments by assessing feedback, planning actions, implementing changes, and responding to reviewers"
+}

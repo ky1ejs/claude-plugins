@@ -24,6 +24,12 @@
       "source": "./plugins/rebase-main",
       "description": "Rebases the current branch onto the latest default branch, automatically resolving merge conflicts",
       "version": "1.0.0"
+    },
+    {
+      "name": "pr-review-handler",
+      "source": "./plugins/pr-review-handler",
+      "description": "Processes PR review comments by assessing feedback, planning actions, implementing changes, and responding to reviewers",
+      "version": "1.0.0"
     }
   ]
 }
