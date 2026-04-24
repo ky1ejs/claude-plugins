@@ -1,0 +1,5 @@
+{
+  "name": "rebase-main",
+  "version": "1.0.0",
+  "description": "Rebases the current branch onto the latest default branch, automatically resolving merge conflicts"
+}

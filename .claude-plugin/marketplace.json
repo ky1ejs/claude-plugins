@@ -18,6 +18,12 @@
       "source": "./plugins/spec-workflow",
       "description": "Spec-driven development workflow: explore ideas, write specs, review with AI personas, and execute implementations",
       "version": "1.0.0"
+    },
+    {
+      "name": "rebase-main",
+      "source": "./plugins/rebase-main",
+      "description": "Rebases the current branch onto the latest default branch, automatically resolving merge conflicts",
+      "version": "1.0.0"
     }
   ]
 }
