@@ -63,3 +63,20 @@ iOS development tools with visual feedback via iOS Simulator MCP integration.
 ```
 
 See [ios-engineer README](./plugins/ios-engineer/README.md) for details.
+
+---
+
+### rebase-main
+
+Rebases the current branch onto the latest default branch (main, master, etc.), automatically resolving merge conflicts.
+
+**Features:**
+- Detects default branch and remote automatically
+- Resolves conflicts favoring the default branch, re-applying local changes when additive
+- Special handling for auto-generated files and lock files
+- Stops and asks on ambiguous conflicts
+
+**Install:**
+```
+/plugin install rebase-main@ky1ejs-plugins
+```
