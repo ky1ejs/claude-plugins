@@ -1,0 +1,5 @@
+{
+  "name": "pr-reviewer",
+  "version": "1.0.0",
+  "description": "Thoroughly reviews a GitHub PR and posts inline review comments on the specific lines with feedback; supports GitHub Enterprise and feeds pr-review-handler"
+}

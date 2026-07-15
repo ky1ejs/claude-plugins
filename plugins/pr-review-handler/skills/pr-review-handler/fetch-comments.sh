@@ -5,6 +5,12 @@ set -euo pipefail
 #
 # Usage: bash fetch-comments.sh <PR_URL>
 # Example: bash fetch-comments.sh https://github.com/org/repo/pull/123
+#          bash fetch-comments.sh https://github.mycompany.com/org/repo/pull/123
+#
+# Works against github.com and GitHub Enterprise Server. The host is parsed from
+# the PR URL and passed to `gh api --hostname`, which routes to the correct
+# GraphQL/REST endpoints (github.com vs. an Enterprise instance's /api/graphql).
+# You must be authenticated to that host (run `gh auth login --hostname <host>`).
 #
 # Outputs structured JSON to stdout. Errors go to stderr.
 # Requires: gh (authenticated), jq
@@ -30,20 +36,25 @@ fi
 
 PR_URL="$1"
 
-# Parse owner, repo, and PR number from URL
-if [[ ! "$PR_URL" =~ github\.com/([^/]+)/([^/]+)/pull/([0-9]+) ]]; then
-  die "Invalid PR URL: $PR_URL (expected https://github.com/owner/repo/pull/123)"
+# Parse host, owner, repo, and PR number from the URL.
+# Supports github.com and GitHub Enterprise Server hosts (e.g. github.mycompany.com),
+# with or without a scheme — strip an optional http(s):// prefix first so both
+# "https://host/owner/repo/pull/1" and "host/owner/repo/pull/1" are accepted.
+url_no_scheme="${PR_URL#*://}"
+if [[ ! "$url_no_scheme" =~ ^([^/]+)/([^/]+)/([^/]+)/pull/([0-9]+) ]]; then
+  die "Invalid PR URL: $PR_URL (expected https://<host>/owner/repo/pull/123)"
 fi
 
-OWNER="${BASH_REMATCH[1]}"
-REPO="${BASH_REMATCH[2]}"
-PR_NUMBER="${BASH_REMATCH[3]}"
+HOST="${BASH_REMATCH[1]}"
+OWNER="${BASH_REMATCH[2]}"
+REPO="${BASH_REMATCH[3]}"
+PR_NUMBER="${BASH_REMATCH[4]}"
 
 # --- Prerequisite checks ---
 
 command -v gh >/dev/null 2>&1 || die "gh CLI is not installed"
 command -v jq >/dev/null 2>&1 || die "jq is not installed"
-gh auth status >/dev/null 2>&1 || die "gh is not authenticated (run 'gh auth login')"
+gh auth status --hostname "$HOST" >/dev/null 2>&1 || die "gh is not authenticated for $HOST (run 'gh auth login --hostname $HOST')"
 
 # --- GraphQL query ---
 
@@ -130,8 +141,11 @@ page=0
 while true; do
   page=$((page + 1))
 
-  # Build gh api graphql command
+  # Build gh api graphql command.
+  # --hostname routes the request to the correct instance (github.com or an
+  # Enterprise Server host's /api/graphql endpoint).
   cmd=(gh api graphql
+    --hostname "$HOST"
     -f query="$QUERY"
     -F owner="$OWNER"
     -F repo="$REPO"
