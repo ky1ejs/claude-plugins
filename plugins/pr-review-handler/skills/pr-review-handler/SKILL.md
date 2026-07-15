@@ -48,7 +48,7 @@ flowchart TD
 
 ## Input
 
-- **PR URL**: GitHub PR URL (e.g., `https://github.com/org/repo/pull/123`)
+- **PR URL**: GitHub PR URL (e.g., `https://github.com/org/repo/pull/123`). GitHub Enterprise Server hosts are supported — pass the URL for your instance (e.g., `https://github.mycompany.com/org/repo/pull/123`). The scheme is optional, so `github.com/org/repo/pull/123` works too. The host is inferred from the URL and passed to `gh api --hostname`, so no extra configuration is needed; you just need to be authenticated to that host (`gh auth login --hostname github.mycompany.com`).
 - **Spec file path**: Path to the spec being implemented (provides intent context)
 
 ---
