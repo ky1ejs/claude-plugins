@@ -30,6 +30,12 @@
       "source": "./plugins/pr-review-handler",
       "description": "Processes PR review comments by assessing feedback, planning actions, implementing changes, and responding to reviewers",
       "version": "1.1.0"
+    },
+    {
+      "name": "pr-reviewer",
+      "source": "./plugins/pr-reviewer",
+      "description": "Thoroughly reviews a GitHub PR and posts inline review comments on the specific lines with feedback; supports GitHub Enterprise and feeds pr-review-handler",
+      "version": "1.0.0"
     }
   ]
 }

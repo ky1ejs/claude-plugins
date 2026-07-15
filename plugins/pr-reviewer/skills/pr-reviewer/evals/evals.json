@@ -1,0 +1,24 @@
+{
+  "skill_name": "pr-reviewer",
+  "notes": "Effectiveness is measured on local fixtures with PLANTED issues as ground truth. Each fixture provides a fetch-pr.sh-shaped context.json (metadata + diff + annotatedDiff). The reviewer performs the skill's review+score+filter+anchor steps and writes the findings.json array it would post. Graded on: recall of planted issues, anchor validity (comment lands on a real diff line), and false-positive rate. The posting path (post-review.sh) is verified separately by unit test.",
+  "evals": [
+    {
+      "id": "f1-user-cache",
+      "prompt": "Review this GitHub PR and produce inline review comments. The PR context (metadata + diff + annotatedDiff) has already been fetched into context.json in your working directory. Write the review comments you would post as a JSON array to findings.json.",
+      "planted": ["null-deref (user.name on possibly-undefined db.find result)", "swallowed-error (empty catch in refresh)"],
+      "false_positive_bait": ["trivial clear()", "Map usage"]
+    },
+    {
+      "id": "f2-export",
+      "prompt": "Review this GitHub PR and produce inline review comments. The PR context (metadata + diff + annotatedDiff) has already been fetched into context.json in your working directory. Write the review comments you would post as a JSON array to findings.json.",
+      "planted": ["sql-injection (string interpolation into query)", "unvalidated-limit"],
+      "false_positive_bait": ["summarize()", "unchanged health()"]
+    },
+    {
+      "id": "f3-queue",
+      "prompt": "Review this GitHub PR and produce inline review comments. The PR context (metadata + diff + annotatedDiff) has already been fetched into context.json in your working directory. Write the review comments you would post as a JSON array to findings.json.",
+      "planted": ["missing-await (store.save not awaited)", "resource-leak (conn never closed)"],
+      "false_positive_bait": ["unchanged push()", "items reset after flush"]
+    }
+  ]
+}
