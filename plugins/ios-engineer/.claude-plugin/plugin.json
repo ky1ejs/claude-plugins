@@ -1,7 +1,21 @@
 {
   "name": "ios-engineer",
-  "version": "1.1.0",
+  "displayName": "iOS Engineer",
+  "version": "1.1.1",
   "description": "iOS development tools with visual feedback via iOS Simulator MCP integration",
+  "author": {
+    "name": "Kyle Satti",
+    "url": "https://github.com/ky1ejs"
+  },
+  "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/ios-engineer",
+  "repository": "https://github.com/ky1ejs/claude-plugins",
+  "keywords": [
+    "ios",
+    "swift",
+    "xcode",
+    "simulator",
+    "mobile"
+  ],
   "mcpServers": {
     "ios-simulator": {
       "type": "stdio",

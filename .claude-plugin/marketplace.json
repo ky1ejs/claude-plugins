@@ -1,7 +1,8 @@
 {
   "name": "ky1ejs-plugins",
   "owner": {
-    "name": "Kyle Satti"
+    "name": "Kyle Satti",
+    "url": "https://github.com/ky1ejs"
   },
   "metadata": {
     "description": "Personal collection of Claude Code plugins"
@@ -11,31 +12,94 @@
       "name": "ios-engineer",
       "source": "./plugins/ios-engineer",
       "description": "iOS development tools with visual feedback via iOS Simulator MCP integration",
-      "version": "1.0.0"
+      "version": "1.1.1",
+      "displayName": "iOS Engineer",
+      "author": {
+        "name": "Kyle Satti",
+        "url": "https://github.com/ky1ejs"
+      },
+      "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/ios-engineer",
+      "repository": "https://github.com/ky1ejs/claude-plugins",
+      "keywords": [
+        "ios",
+        "swift",
+        "xcode",
+        "simulator",
+        "mobile"
+      ]
     },
     {
       "name": "spec-workflow",
       "source": "./plugins/spec-workflow",
       "description": "Spec-driven development workflow: explore ideas, write specs, review with AI personas, and execute implementations",
-      "version": "1.0.0"
+      "version": "1.0.1",
+      "displayName": "Spec Workflow",
+      "author": {
+        "name": "Kyle Satti",
+        "url": "https://github.com/ky1ejs"
+      },
+      "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/spec-workflow",
+      "repository": "https://github.com/ky1ejs/claude-plugins",
+      "keywords": [
+        "specs",
+        "planning",
+        "workflow",
+        "review"
+      ]
     },
     {
       "name": "rebase-main",
       "source": "./plugins/rebase-main",
       "description": "Rebases the current branch onto the latest default branch, automatically resolving merge conflicts",
-      "version": "1.0.1"
+      "version": "1.0.2",
+      "displayName": "Rebase on Main",
+      "author": {
+        "name": "Kyle Satti",
+        "url": "https://github.com/ky1ejs"
+      },
+      "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/rebase-main",
+      "repository": "https://github.com/ky1ejs/claude-plugins",
+      "keywords": [
+        "git",
+        "rebase",
+        "conflicts"
+      ]
     },
     {
       "name": "pr-review-handler",
       "source": "./plugins/pr-review-handler",
       "description": "Processes PR review comments by assessing feedback, planning actions, implementing changes, and responding to reviewers",
-      "version": "1.1.0"
+      "version": "1.1.1",
+      "displayName": "PR Review Handler",
+      "author": {
+        "name": "Kyle Satti",
+        "url": "https://github.com/ky1ejs"
+      },
+      "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/pr-review-handler",
+      "repository": "https://github.com/ky1ejs/claude-plugins",
+      "keywords": [
+        "github",
+        "pull-request",
+        "code-review"
+      ]
     },
     {
       "name": "pr-reviewer",
       "source": "./plugins/pr-reviewer",
       "description": "Thoroughly reviews a GitHub PR and posts inline review comments on the specific lines with feedback; supports GitHub Enterprise and feeds pr-review-handler",
-      "version": "1.0.0"
+      "version": "1.0.1",
+      "displayName": "PR Reviewer",
+      "author": {
+        "name": "Kyle Satti",
+        "url": "https://github.com/ky1ejs"
+      },
+      "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/pr-reviewer",
+      "repository": "https://github.com/ky1ejs/claude-plugins",
+      "keywords": [
+        "github",
+        "pull-request",
+        "code-review"
+      ]
     }
   ]
 }

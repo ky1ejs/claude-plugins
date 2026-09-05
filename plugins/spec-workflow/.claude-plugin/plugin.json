@@ -1,5 +1,18 @@
 {
   "name": "spec-workflow",
-  "version": "1.0.0",
-  "description": "Spec-driven development workflow: explore ideas, write specs, review with AI personas, and execute implementations"
+  "displayName": "Spec Workflow",
+  "version": "1.0.1",
+  "description": "Spec-driven development workflow: explore ideas, write specs, review with AI personas, and execute implementations",
+  "author": {
+    "name": "Kyle Satti",
+    "url": "https://github.com/ky1ejs"
+  },
+  "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/spec-workflow",
+  "repository": "https://github.com/ky1ejs/claude-plugins",
+  "keywords": [
+    "specs",
+    "planning",
+    "workflow",
+    "review"
+  ]
 }

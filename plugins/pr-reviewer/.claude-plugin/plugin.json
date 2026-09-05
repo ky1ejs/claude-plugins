@@ -1,5 +1,17 @@
 {
   "name": "pr-reviewer",
-  "version": "1.0.0",
-  "description": "Thoroughly reviews a GitHub PR and posts inline review comments on the specific lines with feedback; supports GitHub Enterprise and feeds pr-review-handler"
+  "displayName": "PR Reviewer",
+  "version": "1.0.1",
+  "description": "Thoroughly reviews a GitHub PR and posts inline review comments on the specific lines with feedback; supports GitHub Enterprise and feeds pr-review-handler",
+  "author": {
+    "name": "Kyle Satti",
+    "url": "https://github.com/ky1ejs"
+  },
+  "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/pr-reviewer",
+  "repository": "https://github.com/ky1ejs/claude-plugins",
+  "keywords": [
+    "github",
+    "pull-request",
+    "code-review"
+  ]
 }

@@ -1,5 +1,17 @@
 {
   "name": "rebase-main",
-  "version": "1.0.1",
-  "description": "Rebases the current branch onto the latest default branch, automatically resolving merge conflicts"
+  "displayName": "Rebase on Main",
+  "version": "1.0.2",
+  "description": "Rebases the current branch onto the latest default branch, automatically resolving merge conflicts",
+  "author": {
+    "name": "Kyle Satti",
+    "url": "https://github.com/ky1ejs"
+  },
+  "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/rebase-main",
+  "repository": "https://github.com/ky1ejs/claude-plugins",
+  "keywords": [
+    "git",
+    "rebase",
+    "conflicts"
+  ]
 }
