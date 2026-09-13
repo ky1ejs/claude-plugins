@@ -97,3 +97,23 @@ Processes PR review comments: assesses each piece of feedback, creates an action
 ```
 /plugin install pr-review-handler@ky1ejs-plugins
 ```
+
+---
+
+### concise
+
+Always-on output style that makes Claude lead with the answer, cut AI tells, and write with controlled-language precision.
+
+**Features:**
+- Applies automatically once enabled — no `/config` selection needed (`force-for-plugin`)
+- Keeps Claude's normal engineering behavior intact (`keep-coding-instructions`)
+- Strict treatment for responses, specs, plans, commit messages and code comments; lighter treatment for notes and docs, which stay succinct but keep some voice
+- Guardrails: never shortens error output, security findings, or destructive-action confirmations, and never cuts a hedge that carries real uncertainty
+- `/concise` skill rewrites existing text against the same rules
+
+**Install:**
+```
+/plugin install concise@ky1ejs-plugins
+```
+
+See [concise README](./plugins/concise/README.md) for details.

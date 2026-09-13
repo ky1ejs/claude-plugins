@@ -100,6 +100,26 @@
         "pull-request",
         "code-review"
       ]
+    },
+    {
+      "name": "concise",
+      "source": "./plugins/concise",
+      "description": "Always-on output style that makes Claude lead with the answer, cut AI tells, and write with controlled-language precision, plus a /concise skill to rewrite existing text",
+      "version": "1.0.0",
+      "displayName": "Concise & Precise",
+      "author": {
+        "name": "Kyle Satti",
+        "url": "https://github.com/ky1ejs"
+      },
+      "homepage": "https://github.com/ky1ejs/claude-plugins/tree/main/plugins/concise",
+      "repository": "https://github.com/ky1ejs/claude-plugins",
+      "keywords": [
+        "output-style",
+        "concise",
+        "writing",
+        "clarity",
+        "anti-slop"
+      ]
     }
   ]
 }
