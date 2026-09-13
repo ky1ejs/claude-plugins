@@ -1,7 +1,7 @@
 {
   "name": "concise",
   "displayName": "Concise & Precise",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Always-on output style that makes Claude lead with the answer, cut AI tells, and write with controlled-language precision, plus a /concise skill to rewrite existing text",
   "author": {
     "name": "Kyle Satti",

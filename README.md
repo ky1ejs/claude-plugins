@@ -110,6 +110,7 @@ Always-on output style that makes Claude lead with the answer, cut AI tells, and
 - Strict treatment for responses, specs, plans, commit messages and code comments; lighter treatment for notes and docs, which stay succinct but keep some voice
 - Guardrails: never shortens error output, security findings, or destructive-action confirmations, and never cuts a hedge that carries real uncertainty
 - `/concise` skill rewrites existing text against the same rules
+- Condensed ruleset for regular Claude chat, to paste into Settings > Instructions for Claude
 
 **Install:**
 ```

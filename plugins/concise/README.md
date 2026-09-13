@@ -65,9 +65,24 @@ Point it at a response, a file, a spec, or a commit message. It returns the rewr
 
 Do not use it on creative or marketing copy. The rules are deliberately flat, and the skill will say so rather than flatten prose that was doing something else.
 
+## Regular Claude chat
+
+The output style reaches Claude Code only — the **Code** tab in Desktop, the CLI, and the web. The **Chat** tab is claude.ai, a separate surface with its own mechanisms.
+
+[`chat/instructions.txt`](./chat/instructions.txt) is a condensed version of the ruleset, 1,725 characters, for **Settings > Instructions for Claude**. That field is account-wide and applies to every conversation automatically, across Desktop, web and mobile, without being selected. It is the closest equivalent to `force-for-plugin`.
+
+Claude.ai has two other personalization surfaces, and neither is always-on:
+
+- **Styles**, picked per chat from the picker under the composer. Useful as an off-switch, since Instructions cannot be toggled per conversation. Build one from [`output-styles/concise.md`](./output-styles/concise.md) — its body works as style text, minus the frontmatter. The two stack: Instructions still apply underneath whichever style is active.
+- **Skills**, invoked on demand. Zip [`skills/concise/`](./skills/concise/) and upload it under Settings > Capabilities to get the rewrite workflow in chat.
+
+The condensed text keeps the "brevity governs presentation, not thinking" clause and the never-shorten list, even though they cost characters. In Claude Code the harness reinforces them; in plain chat they are the only thing holding the line, and they are the first clauses a length trim would take.
+
 ## Turning it off
 
 Disable the plugin. `force-for-plugin` overrides your `outputStyle` setting while the plugin is on, so the setting alone will not switch it off.
+
+In regular chat, clear the text from Settings > Instructions for Claude.
 
 ## Known limit
 
