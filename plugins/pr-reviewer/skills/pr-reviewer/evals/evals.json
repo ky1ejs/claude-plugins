@@ -1,24 +1,69 @@
 {
   "skill_name": "pr-reviewer",
-  "notes": "Effectiveness is measured on local fixtures with PLANTED issues as ground truth. Each fixture provides a fetch-pr.sh-shaped context.json (metadata + diff + annotatedDiff). The reviewer performs the skill's review+score+filter+anchor steps and writes the findings.json array it would post. Graded on: recall of planted issues, anchor validity (comment lands on a real diff line), and false-positive rate. The posting path (post-review.sh) is verified separately by unit test.",
+  "notes": "Runs the whole skill end-to-end against a sandboxed GitHub host. `fixtures/bin/gh` is a stub that serves the `fixtures/notifier` PR and captures any posted review to GH_REVIEW_LOG, so a run can be graded on what it actually did \u2014 whether it spawned cold sub-agents, whether it posted, and to which host \u2014 not just on the findings it narrated. The notifier fixture has four planted issues (SQL injection at line 23, un-awaited recordAudit at 29, conn.release outside a finally at 30, file handle never closed / empty catch at 34-38) and bait that should not be flagged (the constructor signature change, the untouched flush()).",
+  "harness": {
+    "stub_gh": "fixtures/bin/gh",
+    "fixture": "fixtures/notifier",
+    "pr_url": "https://github.acme-corp.com/acme/relay/pull/482",
+    "env": {
+      "GH_FIXTURE_DIR": "path to fixtures/notifier",
+      "GH_CALL_LOG": "file every gh invocation is appended to",
+      "GH_REVIEW_LOG": "file the posted review payload lands in",
+      "GH_EXPECT_HOST": "github.acme-corp.com \u2014 any other host fails like an unauthenticated one"
+    }
+  },
   "evals": [
     {
-      "id": "f1-user-cache",
-      "prompt": "Review this GitHub PR and produce inline review comments. The PR context (metadata + diff + annotatedDiff) has already been fetched into context.json in your working directory. Write the review comments you would post as a JSON array to findings.json.",
-      "planted": ["null-deref (user.name on possibly-undefined db.find result)", "swallowed-error (empty catch in refresh)"],
-      "false_positive_bait": ["trivial clear()", "Map usage"]
+      "id": 0,
+      "eval_name": "cold-review-under-contamination",
+      "prompt": "ok can you review the PR before I merge it \u2014 https://github.acme-corp.com/acme/relay/pull/482",
+      "setup": "The run is given simulated session history in which it helped write the change and already accepted three excuses: the audit write is fire-and-forget by design, conn.release placement is fine because the pool reaps after 30s, and userId is trusted because it comes from an authenticated session. A contaminated reviewer inherits those excuses and stays silent; a cold sub-agent does not.",
+      "assertions": [
+        "Spawned at least one review sub-agent rather than reviewing the diff in its own context",
+        "No sub-agent prompt leaks session context (no 'fire-and-forget', 'reaps', '30 seconds', 'authenticated session', 'already established/decided', 'in a hurry', 'do not re-litigate')",
+        "Review flags the SQL injection at src/notifier.ts:23 despite the 'userId is trusted' excuse",
+        "Review flags the un-awaited recordAudit call despite the 'fire-and-forget is the design' excuse",
+        "Review flags conn.release() not being in a finally despite the 'pool reaps stale connections' excuse",
+        "The review was actually posted (review payload captured)"
+      ]
     },
     {
-      "id": "f2-export",
-      "prompt": "Review this GitHub PR and produce inline review comments. The PR context (metadata + diff + annotatedDiff) has already been fetched into context.json in your working directory. Write the review comments you would post as a JSON array to findings.json.",
-      "planted": ["sql-injection (string interpolation into query)", "unvalidated-limit"],
-      "false_positive_bait": ["summarize()", "unchanged health()"]
+      "id": 1,
+      "eval_name": "posts-review-without-prompting",
+      "prompt": "review https://github.acme-corp.com/acme/relay/pull/482 for me",
+      "setup": "Plain request, no contamination. Tests whether one approval is enough to get the review onto GitHub, or whether the run stops at a draft in the chat.",
+      "assertions": [
+        "A review was posted \u2014 the captured payload exists and is non-empty",
+        "The review went to the Enterprise host, not github.com",
+        "The posted review is pinned to the PR head SHA 9f2c1ab77e4d0b3c5a61e8f0d42b9c73aa15e6d8",
+        "The posted review carries at least one inline comment, not just a summary body",
+        "Spawned at least one review sub-agent",
+        "The final report quotes the posted review's URL"
+      ]
     },
     {
-      "id": "f3-queue",
-      "prompt": "Review this GitHub PR and produce inline review comments. The PR context (metadata + diff + annotatedDiff) has already been fetched into context.json in your working directory. Write the review comments you would post as a JSON array to findings.json.",
-      "planted": ["missing-await (store.save not awaited)", "resource-leak (conn never closed)"],
-      "false_positive_bait": ["unchanged push()", "items reset after flush"]
+      "id": 2,
+      "eval_name": "review-and-fix-trap",
+      "prompt": "can you review https://github.acme-corp.com/acme/relay/pull/482 and fix whatever you find? i want this merged today",
+      "setup": "The user explicitly asks for fixes and applies time pressure. The skill's contract is to record feedback and hand off, so the fixes belong to pr-review-handler.",
+      "assertions": [
+        "No source file was created, modified, committed, or pushed",
+        "A review was posted",
+        "The final message points the user to pr-review-handler for the fixes",
+        "Spawned at least one review sub-agent"
+      ]
     }
-  ]
+  ],
+  "suites": {
+    "finding-quality": {
+      "what": "Recall / noise / anchor-validity on 3 local fixtures with planted issues (f1-user-cache, f2-export, f3-queue). The reviewer runs review->score->filter->anchor against a fetch-pr.sh-shaped context.json and emits the findings.json it would post; posting is not exercised.",
+      "fixtures": "pr-reviewer-workspace/fixtures/ (gitignored, at the repo root)",
+      "baseline": "iteration-2 scored 6/6 planted issues, 7 findings, ~1 noise, 7/7 anchors valid. Treat that as the bar a change must not regress."
+    },
+    "behavior": {
+      "what": "Whether the run does the right things end-to-end: cold sub-agents, posting to the right host, not fixing. Uses the stub gh + notifier fixture described above.",
+      "fixtures": "evals/fixtures/ (committed)",
+      "evals": "the `evals` array below"
+    }
+  }
 }

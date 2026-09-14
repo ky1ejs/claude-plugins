@@ -18,6 +18,16 @@ allowed-tools:
 
 Reviews a GitHub PR thoroughly and posts inline comments on the specific lines that have feedback. Built to run **before** `pr-review-handler`: this skill *generates* the review comments; `pr-review-handler` then *processes* them (assesses, implements fixes, replies).
 
+## Scope: record the feedback on GitHub — never fix it here
+
+**This skill's only deliverable is posted GitHub review comments.** Its job is to *record* problems as a durable paper trail on the PR, not to solve them. This boundary is not optional:
+
+- **Do NOT edit source code, apply fixes, commit, or push.** Not even the "obvious" one-line fixes, and not even when the user's request was "review *and fix*" this PR. If the user wants fixes, the answer is: post the comments first, then run `pr-review-handler` — which reads those posted comments and implements the changes with the user's approval. (This skill has no `Edit` tool by design; don't route around that with `Agent` or `git`.)
+- **The review sub-agents in Step 2 are read-only.** They find and describe issues; they never change files. Give them `Read`/`Grep`/`gh api`, not a mandate to fix.
+- **Posting the review to GitHub is mandatory before any handoff.** The whole point is the paper trail: the author (and any future run) can see the exact feedback, discuss it, and track resolution. Reasoning that gets "solved" in your head instead of posted leaves no record and defeats the workflow.
+
+Why this matters: skipping straight to a fix loses the reviewer's feedback as a reviewable, discussable artifact, and it collapses two deliberate steps (record → action) into an unaudited one. Keep them separate. If you catch yourself about to open a file to *change* it, stop — that belongs to `pr-review-handler`, on the next invocation.
+
 ## When to use this vs. the alternatives
 
 - **`pr-reviewer` (this skill)** — review an arbitrary PR by URL, especially on **GitHub Enterprise**, and produce inline line-anchored comments you can then feed to `pr-review-handler`. Full control over the posted comments and the host.
@@ -195,6 +205,8 @@ bash <plugin_dir>/post-review.sh <PR_URL> <findings.json> <summary.txt> [EVENT]
 
 `post-review.sh` fetches the diff, **validates every finding's `(path, side, line)` against the lines GitHub will actually accept**, drops (and reports on stderr) any that don't match, and posts the rest as a single review pinned to the PR's head commit. This matters because the create-review API is all-or-nothing — one bad anchor otherwise rejects the entire review. If it reports drops, re-anchor those findings using the `annotatedDiff` and re-run, or fold them into the summary.
 
+If *every* finding gets dropped, the script refuses to post rather than leaving a summary-only review behind — re-anchor and re-run. (To post a summary with no inline comments deliberately, set `ALLOW_NO_COMMENTS=1`.) On success it prints `Review posted: <url>` to stderr; quote that URL in your output.
+
 ---
 
 ## Output
@@ -211,7 +223,7 @@ bash <plugin_dir>/post-review.sh <PR_URL> <findings.json> <summary.txt> [EVENT]
 **Next step**: Run `pr-review-handler` on this PR to assess, implement, and reply to these comments.
 ```
 
-Since this skill exists to feed `pr-review-handler`, always end by pointing the user there.
+Since this skill exists to feed `pr-review-handler`, always end by pointing the user there. **Stop after posting** — do not begin fixing, even if the user's original ask included fixes. Point them (or offer) to run `pr-review-handler` next; that skill fetches the comments you just posted and actions them. The comments on GitHub are the handoff.
 
 ---
 

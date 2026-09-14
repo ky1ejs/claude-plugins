@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Stub `gh` for pr-reviewer evals.
+#
+# Serves a fixture PR instead of hitting a real GitHub host, and records every
+# posted review so an eval can assert that the run actually posted rather than
+# stopping at a draft in the chat. Put this directory first on PATH.
+#
+# Env:
+#   GH_FIXTURE_DIR : directory holding pr.json + diff.patch
+#   GH_CALL_LOG    : file this script appends every invocation to
+#   GH_REVIEW_LOG  : file the posted review payload is written to
+#   GH_EXPECT_HOST : if set, a request for any other host fails like a real
+#                    unauthenticated host would (catches a run that silently
+#                    retargets an Enterprise PR at github.com)
+
+FIXTURE_DIR="${GH_FIXTURE_DIR:?GH_FIXTURE_DIR not set}"
+CALL_LOG="${GH_CALL_LOG:-/dev/null}"
+REVIEW_LOG="${GH_REVIEW_LOG:-/dev/null}"
+
+printf '%s\n' "gh $*" >>"$CALL_LOG"
+
+# Pull --hostname out of the argument list wherever it appears.
+HOST=""
+args=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --hostname) HOST="$2"; shift 2 ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+set -- "${args[@]}"
+
+if [[ -n "${GH_EXPECT_HOST:-}" && -n "$HOST" && "$HOST" != "$GH_EXPECT_HOST" ]]; then
+  echo "error: not authenticated for $HOST" >&2
+  exit 1
+fi
+
+pr_url="https://${HOST:-github.com}/acme/relay/pull/482"
+pr_json=$(jq --arg url "$pr_url" '.html_url = $url' "$FIXTURE_DIR/pr.json")
+
+case "${1:-}" in
+  auth)
+    # `gh auth status --hostname <h>` — host filtering already handled above.
+    echo "Logged in to ${HOST:-github.com}" >&2
+    exit 0
+    ;;
+  api) shift ;;
+  *) echo "stub gh: unsupported command '${1:-}'" >&2; exit 1 ;;
+esac
+
+# --- parse `gh api` arguments ---
+ENDPOINT=""
+ACCEPT=""
+JQ_EXPR=""
+INPUT=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -H) ACCEPT="$ACCEPT $2"; shift 2 ;;
+    --jq) JQ_EXPR="$2"; shift 2 ;;
+    --input) INPUT="$2"; shift 2 ;;
+    -f|-F) shift 2 ;;
+    --paginate|--method|-X) shift ;;
+    -*) shift ;;
+    *) [[ -z "$ENDPOINT" ]] && ENDPOINT="$1"; shift ;;
+  esac
+done
+
+emit() {
+  if [[ -n "$JQ_EXPR" ]]; then jq -r "$JQ_EXPR"; else cat; fi
+}
+
+case "$ENDPOINT" in
+  */pulls/*/reviews)
+    # The review POST — capture it, then answer like the create-review API.
+    payload=$(cat "${INPUT:--}")
+    printf '%s\n' "$payload" >"$REVIEW_LOG"
+    n=$(printf '%s' "$payload" | jq '.comments | length')
+    printf '%s' "$payload" | jq \
+      --arg url "${pr_url}#pullrequestreview-777001" \
+      --argjson n "$n" \
+      '{id: 777001, html_url: $url, state: (if .event == "COMMENT" then "COMMENTED" else .event end), body: .body, comment_count: $n}'
+    ;;
+  */pulls/*/files)
+    jq -n '[{filename: "src/notifier.ts", status: "modified", additions: 24, deletions: 4}]' | emit
+    ;;
+  */pulls/*)
+    if [[ "$ACCEPT" == *"v3.diff"* ]]; then
+      cat "$FIXTURE_DIR/diff.patch"
+    else
+      printf '%s\n' "$pr_json" | emit
+    fi
+    ;;
+  *)
+    echo "stub gh: unsupported endpoint '$ENDPOINT'" >&2
+    exit 1
+    ;;
+esac

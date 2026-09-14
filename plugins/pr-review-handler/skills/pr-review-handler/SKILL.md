@@ -20,6 +20,8 @@ allowed-tools:
 
 Systematically processes PR review comments: assesses each piece of feedback, creates a coherent action plan, implements changes, and responds to reviewers.
 
+This skill is the **action** half of a two-step workflow: `pr-reviewer` *records* feedback as inline comments on the PR (the paper trail), and this skill *actions* those posted comments. It works only from feedback that already exists on GitHub — Step 1 fetches it. If the user describes review points that aren't posted on the PR yet, don't fix them from that description; have them run `pr-reviewer` first so the feedback is recorded, then run this skill on the result.
+
 ---
 
 ## Flow
@@ -35,7 +37,7 @@ flowchart TD
   F -->|Yes| G
   F -->|No, with edits| E
   F -->|Abort| Z
-  G["G: Execute actions"] --> H
+  G["G: Verify checkout matches PR host/repo/branch, then execute actions"] --> H
   H["H: Test, lint, format"] --> I
   I["I: Commit and push"] --> J
   J["J: Draft responses for user review"] --> K
@@ -73,7 +75,12 @@ This script uses the GitHub **GraphQL API** (the only way to get `isResolved` st
     "title": "Feature X",
     "url": "https://github.com/org/repo/pull/123",
     "headRefName": "feature/x",
-    "baseRefName": "main"
+    "baseRefName": "main",
+    "host": "github.com",
+    "owner": "org",
+    "repo": "repo",
+    "isCrossRepository": false,
+    "headRepository": "org/repo"
   },
   "unresolvedThreads": [
     {
@@ -130,6 +137,8 @@ This script uses the GitHub **GraphQL API** (the only way to get `isResolved` st
 - **`comments`** array — contains the full conversation thread. Check for prior responses (especially ones starting with `🤖 *Addressed via Claude Code*`) to avoid re-handling work that's already been done
 - **`topLevelComments`** — general PR discussion not tied to specific code lines; these need assessment too (see Step 2)
 - **`reviewBodyComments`** — the high-level text reviewers write when submitting a review (e.g., "Changes requested: ..."). These often contain important feedback like bug reports or blocking concerns that aren't tied to specific code lines. Easy to miss — always check these
+- **`host` / `owner` / `repo`** — parsed from the PR URL (not from the API response), so they identify the exact instance this PR lives on. Use them in Step 5 to confirm the local checkout points at the same place before changing or pushing anything
+- **`isCrossRepository`** / **`headRepository`** — true when the PR comes from a fork; `headRepository` is the fork the branch actually lives in. Commits must go there, not to the base repo
 
 ---
 
@@ -289,7 +298,28 @@ User can also add notes like "skip action 2 for now" or "change the response ton
 
 ---
 
-## Step 5: Execute Actions
+## Step 5: Verify the checkout, then execute
+
+### Checkout guard — run before the first edit
+
+Everything up to here was read-only against the PR's host. Editing and pushing happen against a **local** repo, and nothing guarantees that repo is the same one. On a machine with both github.com and an Enterprise host configured, the wrong checkout means committing a fix to an unrelated repo, or pushing a branch to the wrong instance.
+
+Confirm all three before touching a file:
+
+```bash
+git remote get-url origin          # host must match pr.host; path must match pr.owner/pr.repo
+git rev-parse --abbrev-ref HEAD    # must equal pr.headRefName
+git status --porcelain             # uncommitted changes? surface them before adding more
+```
+
+- **Host or repo mismatch** → stop. Tell the user which repo is checked out and which the PR belongs to; ask them to `cd` to the right clone. Don't guess, and don't try to fix it by adding a remote.
+- **Wrong branch** → `git fetch origin <headRefName> && git checkout <headRefName>`, then confirm. If the branch doesn't exist locally, say so rather than creating one.
+- **Fork PR** (`isCrossRepository: true`) → the branch lives in `headRepository`, not the base repo. The local checkout's `origin` (or a fork remote) must point at *that* repo, and you need write access to it. If you don't have it, stop after the assessment: post the responses, skip the code changes, and tell the user the fix has to come from the fork's owner.
+- **Dirty tree** → list what's already modified and confirm with the user before mixing review fixes into it.
+
+Behind at the remote is fine — Step 7 pushes; it doesn't rebase.
+
+### Execute
 
 For each approved action:
 
@@ -336,8 +366,10 @@ Resolves review comments from: @reviewer1, @reviewer2
 ### Push
 
 ```bash
-git push origin [branch-name]
+git push origin <headRefName>
 ```
+
+Push to the remote you verified in Step 5 — the one whose URL matches `pr.host` (and `headRepository` for a fork PR). Never add a remote or retarget the push to reach the PR; if the right remote isn't there, that's the Step 5 mismatch, and it's the user's call.
 
 ---
 
@@ -447,6 +479,12 @@ Exit with "PR is already merged. Comments cannot be addressed."
 
 ### Branch conflicts
 Notify user: "Branch has conflicts with base. Please resolve before addressing comments."
+
+### Wrong repo checked out
+The local repo doesn't match the PR's host/owner/repo (see Step 5). Stop before editing; report both and ask the user to switch clones.
+
+### Fork PR without write access
+Assess and reply to the comments, but skip the code changes — say in the responses that the fix needs to come from the branch's owner, and tell the user why nothing was pushed.
 
 ### Rate limiting
 If `gh` rate limits, pause and notify user with retry time.
