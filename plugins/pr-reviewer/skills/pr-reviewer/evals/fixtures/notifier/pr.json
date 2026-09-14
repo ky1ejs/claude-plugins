@@ -1,0 +1,14 @@
+{
+  "number": 482,
+  "title": "Add per-user locale + audit log to Notifier",
+  "body": "Notifications were going out in English regardless of the user's locale, and we had no record of what we sent.\n\nThis reads the user's channel/locale preferences from the DB, passes the locale into the template renderer, and appends a line to an audit file for every send.\n\nThe transport layer is unchanged.",
+  "state": "open",
+  "draft": false,
+  "merged": false,
+  "base": { "ref": "main" },
+  "head": { "ref": "notifier-locale-audit", "sha": "9f2c1ab77e4d0b3c5a61e8f0d42b9c73aa15e6d8" },
+  "html_url": "PLACEHOLDER_URL",
+  "changed_files": 1,
+  "additions": 24,
+  "deletions": 4
+}

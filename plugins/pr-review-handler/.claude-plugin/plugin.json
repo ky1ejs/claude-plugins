@@ -1,7 +1,7 @@
 {
   "name": "pr-review-handler",
   "displayName": "PR Review Handler",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Processes PR review comments by assessing feedback, planning actions, implementing changes, and responding to reviewers",
   "author": {
     "name": "Kyle Satti",

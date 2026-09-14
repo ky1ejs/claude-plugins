@@ -68,6 +68,11 @@ query($owner: String!, $repo: String!, $number: Int!, $threadCursor: String) {
       url
       headRefName
       baseRefName
+      isCrossRepository
+      headRepository {
+        nameWithOwner
+        url
+      }
       reviewThreads(first: 100, after: $threadCursor) {
         totalCount
         pageInfo {
@@ -173,13 +178,21 @@ while true; do
 
   # Extract PR metadata (only on first page)
   if [[ $page -eq 1 ]]; then
-    pr_metadata=$(echo "$result" | jq '{
+    # host/owner/repo come from the PR URL, not the API response, so the caller can
+    # verify the local checkout points at the same instance before pushing.
+    pr_metadata=$(echo "$result" | jq \
+      --arg host "$HOST" --arg owner "$OWNER" --arg repo "$REPO" '{
       number: .data.repository.pullRequest.number,
       state: .data.repository.pullRequest.state,
       title: .data.repository.pullRequest.title,
       url: .data.repository.pullRequest.url,
       headRefName: .data.repository.pullRequest.headRefName,
-      baseRefName: .data.repository.pullRequest.baseRefName
+      baseRefName: .data.repository.pullRequest.baseRefName,
+      host: $host,
+      owner: $owner,
+      repo: $repo,
+      isCrossRepository: .data.repository.pullRequest.isCrossRepository,
+      headRepository: (.data.repository.pullRequest.headRepository.nameWithOwner // null)
     }')
 
     total_thread_count=$(echo "$result" | jq '.data.repository.pullRequest.reviewThreads.totalCount')

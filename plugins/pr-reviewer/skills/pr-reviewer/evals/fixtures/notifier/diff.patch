@@ -1,0 +1,42 @@
+diff --git a/src/notifier.ts b/src/notifier.ts
+index 1a2b3c4..5d6e7f8 100644
+--- a/src/notifier.ts
++++ b/src/notifier.ts
+@@ -12,14 +12,34 @@ import { getPool } from "./db";
+ import { renderTemplate } from "./templates";
+ 
+ export class Notifier {
+-  constructor(private readonly transport: Transport) {}
++  constructor(
++    private readonly transport: Transport,
++    private readonly auditPath: string,
++  ) {}
+ 
+-  send(userId: string, templateId: string): void {
+-    const body = renderTemplate(templateId, { userId });
+-    this.transport.deliver(userId, body);
++  async send(userId: string, templateId: string): Promise<void> {
++    const conn = await getPool().acquire();
++    const prefs = await conn.query(
++      `SELECT channel, locale FROM prefs WHERE user_id = '${userId}'`,
++    );
++
++    const body = renderTemplate(templateId, { userId, locale: prefs.locale });
++    this.transport.deliver(userId, body);
++
++    this.recordAudit(userId, templateId);
++    conn.release();
++  }
++
++  private async recordAudit(userId: string, templateId: string): Promise<void> {
++    const handle = await fs.open(this.auditPath, "a");
++    try {
++      await handle.write(`${userId} ${templateId}\n`);
++    } catch (err) {
++    }
+   }
+ 
+   async flush(): Promise<void> {
+     await this.transport.flush();
+   }
+ }

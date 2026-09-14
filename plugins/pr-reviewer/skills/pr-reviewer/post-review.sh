@@ -14,6 +14,10 @@ set -euo pipefail
 #   SUMMARY_FILE : path to a file whose contents become the review's summary body.
 #   EVENT        : COMMENT (default) | APPROVE | REQUEST_CHANGES
 #
+# Env:
+#   ALLOW_NO_COMMENTS=1 : post even if anchor validation dropped every comment
+#                         (summary-only review). Off by default — see below.
+#
 # Why the validation step: GitHub's "create review" API is all-or-nothing — if a
 # single comment points at a line that isn't part of the diff, the WHOLE review is
 # rejected (422). So we compute the set of commentable (path, side, line) tuples
@@ -81,6 +85,15 @@ if [[ "$dropped_count" -gt 0 ]]; then
   echo "$dropped" | jq -r '.[] | "  - \(.path):\(.line) [\(.side)] — \(.body[0:80])"' >&2
 fi
 
+# If validation ate every comment, posting would leave a summary-only review behind
+# and a re-run would stack a second review on the PR. Refuse instead, so the caller
+# re-anchors against the annotatedDiff. ALLOW_NO_COMMENTS=1 opts into summary-only.
+if [[ "$valid_count" -eq 0 && "$dropped_count" -gt 0 && "${ALLOW_NO_COMMENTS:-0}" != "1" ]]; then
+  die "all $dropped_count comment(s) failed anchor validation; nothing to post.
+  Re-anchor them to line numbers from the annotatedDiff and re-run, or set
+  ALLOW_NO_COMMENTS=1 to post the summary with no inline comments."
+fi
+
 # Assemble the review comments payload (only fields the API accepts).
 comments_payload=$(echo "$valid" | jq '[.[] | {path, line, side, body}
   + (if .start_line then {start_line: (.start_line|tonumber), start_side: (.start_side // "RIGHT")} else {} end)]')
@@ -97,4 +110,9 @@ payload=$(jq -n \
   '{commit_id: $commit, body: $body, event: $event, comments: $comments}')
 
 echo "Posting review to $OWNER/$REPO#$NUM on $HOST ($valid_count inline comment(s), event=$EVENT)..." >&2
-echo "$payload" | api "repos/$OWNER/$REPO/pulls/$NUM/reviews" --input -
+response=$(echo "$payload" | api "repos/$OWNER/$REPO/pulls/$NUM/reviews" --input -) \
+  || die "failed to post review to $OWNER/$REPO#$NUM on $HOST"
+
+# Surface the review URL on stderr so it can't be missed in the JSON blob.
+echo "Review posted: $(echo "$response" | jq -r '.html_url')" >&2
+echo "$response"
